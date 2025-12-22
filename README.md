@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clinic CRM
 
-## Getting Started
+Hệ thống quản lý phòng khám (Clinic CRM) hiện đại được xây dựng bằng **Next.js 16**, tối ưu hóa cho hiệu suất và trải nghiệm người dùng, tích hợp **Supabase** để quản lý dữ liệu và xác thực thời gian thực.
 
-First, run the development server:
+## Tính Năng Chính
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Quản Trị Viên (Admin Dashboard)**:
+  - **Quản lý Bác sĩ**: Danh sách bác sĩ, chỉnh sửa hồ sơ, chuyên khoa, và trạng thái hoạt động.
+  - **Quản lý Lịch hẹn**: Xếp lịch, theo dõi và xử lý các cuộc hẹn khám bệnh.
+  - **Thống kê**: Biểu đồ và báo cáo về hoạt động phòng khám (tích hợp Recharts).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Cổng Thông Tin Bác Sĩ**:
+  - Giao diện dành riêng cho bác sĩ để xem lịch trình và bệnh nhân (đang phát triển tại `/doctor`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Hệ Thống**:
+  - **Xác thực An toàn**: Đăng nhập/Đăng xuất bảo mật với Supabase Auth.
+  - **Hiệu suất cao**: Sử dụng Next.js App Router và React Server Components.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Công Nghệ Sử Dụng
 
-## Learn More
+Dự án sử dụng các công nghệ mới nhất trong hệ sinh thái React:
 
-To learn more about Next.js, take a look at the following resources:
+- **Core**: [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/), TypeScript
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Components**: Radix UI (thông qua các component tùy chỉnh), Lucide React (Icons)
+- **State Management & Data Fetching**: [TanStack Query](https://tanstack.com/query)
+- **Form Handling**: React Hook Form + Zod Validation
+- **Backend & Database**: [Supabase](https://supabase.com/) (PostgreSQL, Auth, Realtime)
+- **Utilities**: `clsx`, `tailwind-merge` cho xử lý class động.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Cấu Trúc Thư Mục
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `app/`: Directoy chính chứa các routes và pages (App Router).
+  - `admin/`: Các tính năng quản trị.
+  - `doctor/`: Các tính năng cho bác sĩ.
+  - `api/`: Các API Routes (Serverless functions).
+- `components/`: Các UI components tái sử dụng (Button, Input, Modal...).
+- `lib/`: Các tiện ích (utils), cấu hình Supabase clients, định nghĩa Types.
+- `public/`: Assets tĩnh (hình ảnh, icons).
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> Dự án này được phát triển để tối ưu hóa quy trình vận hành phòng khám, giảm thiểu thao tác thủ công và nâng cao chất lượng phục vụ bệnh nhân.
