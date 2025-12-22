@@ -171,7 +171,7 @@ export function LoginForm() {
               disabled={loading}
               className={`
                 relative w-full h-12 rounded-xl font-semibold text-white
-                bg-linear-gradient-to-r from-blue-600 to-cyan-600
+                bg-linear-to-r from-blue-600 to-cyan-600
                 hover:from-blue-700 hover:to-cyan-700
                 shadow-lg shadow-blue-500/30
                 transition-all duration-300 ease-in-out
