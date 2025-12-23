@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Loader2, X, User, Briefcase, Calendar, Clock, Plus, Trash2 } from 'lucide-react'
+import { Loader2, X, User, Briefcase, Calendar, Trash2 } from 'lucide-react'
 
 export interface Doctor {
   id: string
@@ -84,13 +84,29 @@ export function DoctorModal({ isOpen, onClose, doctor }: DoctorModalProps) {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
+  // Store initial doctor info values
+  const [doctorInfo, setDoctorInfo] = useState({
+    specialty: '',
+    degree: '',
+    price_per_slot: 0,
+    bio: ''
+  })
+
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
     if (isOpen && doctor) {
+      // Initialize doctor info from props
+      setDoctorInfo({
+        specialty: doctor.specialty || '',
+        degree: doctor.degree || '',
+        price_per_slot: doctor.price_per_slot || 0,
+        bio: doctor.bio || ''
+      })
       fetchData()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, doctor])
 
   const fetchData = async () => {
@@ -222,90 +238,49 @@ export function DoctorModal({ isOpen, onClose, doctor }: DoctorModalProps) {
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    const specialty = formData.get('specialty') as string
-    const degree = formData.get('degree') as string
-    const price = parseInt(formData.get('price') as string) || 0
-    const bio = formData.get('bio') as string
+
+    // Get form values, fallback to stored doctorInfo if field doesn't exist in form (other tabs)
+    const specialty = formData.get('specialty') as string || doctorInfo.specialty
+    const degree = formData.get('degree') as string || doctorInfo.degree
+    const priceStr = formData.get('price') as string
+    const price = priceStr ? parseInt(priceStr) : doctorInfo.price_per_slot
+    const bio = formData.get('bio') as string || doctorInfo.bio
 
     try {
-      // 1. Update doctors table
-      const { error: doctorError } = await supabase
-        .from('doctors')
-        .update({
+      // Always prepare schedules (will only be used if date range is set)
+      const schedulesToSubmit = generateSchedulesFromWeekly()
+
+      // Call API to update doctor
+      const res = await fetch('/api/admin/update-doctor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          doctor_id: doctor!.id,
           specialty,
           degree,
           price_per_slot: price,
           bio,
-        })
-        .eq('id', doctor!.id)
+          service_ids: selectedServices, // Always send services
+          schedules: schedulesToSubmit, // Always send schedules
+          start_date: startDate,
+          end_date: endDate
+        }),
+      })
 
-      if (doctorError) throw doctorError
+      const data = await res.json()
 
-      // 2. Update doctor_services (if on services tab)
-      if (activeTab === 'services' || selectedServices.length > 0) {
-        // Delete existing service links
-        await supabase
-          .from('doctor_services')
-          .delete()
-          .eq('doctor_id', doctor!.id)
-
-        // Insert new service links
-        if (selectedServices.length > 0) {
-          const serviceLinks = selectedServices.map(serviceId => ({
-            doctor_id: doctor!.id,
-            service_id: serviceId
-          }))
-
-          const { error: servicesError } = await supabase
-            .from('doctor_services')
-            .insert(serviceLinks)
-
-          if (servicesError) throw servicesError
-        }
-      }
-
-      // 3. Update schedules (if on schedule tab)
-      if (activeTab === 'schedule') {
-        const schedulesToSubmit = generateSchedulesFromWeekly()
-
-        // Delete existing schedules in the date range
-        await supabase
-          .from('doctor_schedules')
-          .delete()
-          .eq('doctor_id', doctor!.id)
-          .gte('date', startDate)
-          .lte('date', endDate)
-
-        // Insert new schedules
-        if (schedulesToSubmit.length > 0) {
-          const scheduleRecords: any[] = []
-
-          for (const schedule of schedulesToSubmit) {
-            for (const shift of schedule.shifts) {
-              scheduleRecords.push({
-                doctor_id: doctor!.id,
-                date: schedule.date,
-                start_time: shift.start_time,
-                end_time: shift.end_time,
-                max_patients: shift.max_patients || 10,
-                is_available: true
-              })
-            }
-          }
-
-          const { error: schedulesError } = await supabase
-            .from('doctor_schedules')
-            .insert(scheduleRecords)
-
-          if (schedulesError) throw schedulesError
-        }
+      if (!res.ok) {
+        throw new Error(data.error || data.details || 'Có lỗi xảy ra khi cập nhật')
       }
 
       router.refresh()
       onClose()
     } catch (error) {
       console.error('Error updating doctor:', error)
-      alert('Có lỗi xảy ra khi cập nhật.')
+      const errorMessage = error instanceof Error ? error.message : 'Có lỗi xảy ra khi cập nhật.'
+      alert(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -386,6 +361,7 @@ export function DoctorModal({ isOpen, onClose, doctor }: DoctorModalProps) {
                     <input
                       name="specialty"
                       defaultValue={doctor.specialty}
+                      onChange={(e) => setDoctorInfo(prev => ({ ...prev, specialty: e.target.value }))}
                       required
                       className="mt-1 flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                     />
@@ -395,6 +371,7 @@ export function DoctorModal({ isOpen, onClose, doctor }: DoctorModalProps) {
                     <input
                       name="degree"
                       defaultValue={doctor.degree || ''}
+                      onChange={(e) => setDoctorInfo(prev => ({ ...prev, degree: e.target.value }))}
                       className="mt-1 flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                     />
                   </div>
@@ -406,6 +383,7 @@ export function DoctorModal({ isOpen, onClose, doctor }: DoctorModalProps) {
                     name="price"
                     type="number"
                     defaultValue={doctor.price_per_slot || 0}
+                    onChange={(e) => setDoctorInfo(prev => ({ ...prev, price_per_slot: parseInt(e.target.value) || 0 }))}
                     className="mt-1 flex h-10 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   />
                 </div>
@@ -416,6 +394,7 @@ export function DoctorModal({ isOpen, onClose, doctor }: DoctorModalProps) {
                     name="bio"
                     rows={4}
                     defaultValue={doctor.bio || ''}
+                    onChange={(e) => setDoctorInfo(prev => ({ ...prev, bio: e.target.value }))}
                     className="mt-1 flex w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
                   />
                 </div>
