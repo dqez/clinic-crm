@@ -20,7 +20,6 @@ export function AdminSidebar() {
   const router = useRouter()
   const [userEmail, setUserEmail] = useState<string>('')
   const [userName, setUserName] = useState<string>('')
-  const [userRole, setUserRole] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
@@ -30,9 +29,8 @@ export function AdminSidebar() {
       if (user) {
         setUserEmail(user.email || '')
         // Get name from metadata or use email prefix as fallback
-        const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Admin111'
+        const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]
         setUserName(name)
-        setUserRole(user.user_metadata?.role || 'admin111')
       }
     }
     getUser()
@@ -103,7 +101,6 @@ export function AdminSidebar() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-slate-800 truncate">{userName}</p>
             <p className="text-xs text-slate-500 truncate">{userEmail}</p>
-            <p className="text-xs text-slate-500 truncate">{userRole}</p>
           </div>
         </div>
 

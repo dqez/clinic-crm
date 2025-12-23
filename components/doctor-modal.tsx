@@ -6,17 +6,19 @@ import { useRouter } from 'next/navigation'
 import { Loader2, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-interface Doctor {
+export interface Doctor {
   id: string
   specialty: string
   degree: string | null
   price_per_slot: number | null
   is_available: boolean | null
   bio: string | null
-  user?: {
+  user: {
     name: string
     is_active: boolean | null
-  }
+    email?: string
+    phone?: string
+  } | null
 }
 
 interface DoctorModalProps {

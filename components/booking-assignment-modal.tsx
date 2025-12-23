@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -86,14 +87,14 @@ export function BookingAssignmentModal({ booking, isOpen, onClose }: BookingAssi
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
-        <h3 className="text-lg font-bold mb-4">Xếp lịch cho BN: {booking.patient_name}</h3>
+        <h3 className="text-lg text-slate-900 font-bold mb-4">Xếp lịch cho BN: {booking.patient_name}</h3>
 
-        <p className="mb-2 text-sm text-gray-600">
+        <p className="mb-2 text-sm text-slate-900">
           Dịch vụ: {booking.services?.name} <br />
           Thời gian: {new Date(booking.booking_time).toLocaleString('vi-VN')}
         </p>
 
-        <h4 className="font-semibold mt-4 mb-2">Bác sĩ phù hợp:</h4>
+        <h4 className="font-semibold mt-4 mb-2 text-slate-900">Bác sĩ phù hợp:</h4>
 
         {loading ? <p>Đang tìm...</p> : (
           <div className="space-y-2 max-h-60 overflow-y-auto border p-2 rounded">
@@ -102,8 +103,8 @@ export function BookingAssignmentModal({ booking, isOpen, onClose }: BookingAssi
             {doctors.map(doc => (
               <div key={doc.id} className="flex items-center justify-between p-2 border-b last:border-0 hover:bg-gray-50">
                 <div>
-                  <p className="font-medium">{doc.degree} {doc.name}</p>
-                  <p className="text-xs text-gray-500">{doc.specialty}</p>
+                  <p className="font-medium text-slate-900">{doc.degree} {doc.name}</p>
+                  <p className="text-xs text-slate-500">{doc.specialty}</p>
                 </div>
                 <button
                   onClick={() => handleAssign(doc.id)}
@@ -118,7 +119,7 @@ export function BookingAssignmentModal({ booking, isOpen, onClose }: BookingAssi
         )}
 
         <div className="mt-6 flex justify-end">
-          <button onClick={onClose} className="rounded px-4 py-2 text-sm hover:bg-gray-100">
+          <button onClick={onClose} className="rounded px-4 py-2 text-sm hover:bg-gray-100 text-slate-900">
             Hủy
           </button>
         </div>

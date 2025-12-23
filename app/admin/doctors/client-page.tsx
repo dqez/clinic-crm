@@ -1,28 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState } from 'react'
-import { Search, Edit2, BadgeCheck, GraduationCap } from 'lucide-react'
-import { DoctorModal } from '@/components/doctor-modal'
+import { Search, Edit2, BadgeCheck, GraduationCap, Plus } from 'lucide-react'
+import { DoctorModal, Doctor } from '@/components/doctor-modal'
+import Link from 'next/link'
 
-interface Doctor {
-  id: string
-  specialty: string
-  degree: string | null
-  price_per_slot: number | null
-  is_available: boolean | null
-  bio: string | null
-  user: {
-    name: string
-    email: string
-    phone: string
-    is_active: boolean | null
-  } | null
-}
-
-export function DoctorsClient({ initialDoctors }: { initialDoctors: any[] }) {
+export function DoctorsClient({ initialDoctors }: { initialDoctors: Doctor[] }) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedDoctor, setSelectedDoctor] = useState<any | null>(null)
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Client-side filtering
@@ -36,7 +21,7 @@ export function DoctorsClient({ initialDoctors }: { initialDoctors: any[] }) {
     )
   })
 
-  const handleEdit = (doctor: any) => {
+  const handleEdit = (doctor: Doctor) => {
     setSelectedDoctor(doctor)
     setIsModalOpen(true)
   }
@@ -54,6 +39,13 @@ export function DoctorsClient({ initialDoctors }: { initialDoctors: any[] }) {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+        <Link
+          href="/admin/doctors/create"
+          className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-all active:scale-95"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Thêm Bác sĩ
+        </Link>
       </div>
 
       {/* Grid List */}
