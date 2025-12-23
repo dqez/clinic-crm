@@ -17,7 +17,9 @@ export default async function AdminDashboard() {
     { data: paymentsToday },
     { count: bookingCount },
     { count: patientCount },
-    { data: recentPayments }
+    { data: recentPayments },
+    { data: latestBookings },
+    { data: latestPayments }
   ] = await Promise.all([
     // A. Revenue Today
     supabase
@@ -43,7 +45,22 @@ export default async function AdminDashboard() {
       .from('payments')
       .select('amount, payment_date')
       .eq('status', 'paid')
-      .gte('payment_date', sevenDaysAgoStr)
+      .gte('payment_date', sevenDaysAgoStr),
+
+    // E. Recent Bookings (Activity Feed)
+    supabase
+      .from('bookings')
+      .select('id, patient_name, created_at')
+      .order('created_at', { ascending: false })
+      .limit(5),
+
+    // F. Recent Payments (Activity Feed)
+    supabase
+      .from('payments')
+      .select('id, amount, created_at')
+      .eq('status', 'paid')
+      .order('created_at', { ascending: false })
+      .limit(5)
   ])
 
   const totalRevenueToday = paymentsToday?.reduce((sum, p) => sum + p.amount, 0) || 0
@@ -72,6 +89,41 @@ export default async function AdminDashboard() {
     name: key,
     total: chartDataMap[key]
   }))
+
+  // Combine & Sort Activities
+  const activities = [
+    ...(latestBookings?.map(b => ({
+      type: 'booking',
+      id: b.id,
+      title: `${b.patient_name} đã đặt lịch hẹn mới`,
+      amount: 0,
+      time: b.created_at || new Date().toISOString(),
+      initials: b.patient_name ? b.patient_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : '??'
+    })) || []),
+    ...(latestPayments?.map(p => ({
+      type: 'payment',
+      id: p.id,
+      title: `Thanh toán ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.amount ?? 0)} được ghi nhận`,
+      amount: p.amount,
+      time: p.created_at || new Date().toISOString(),
+      initials: '$'
+    })) || [])
+  ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+    .slice(0, 5)
+
+  function timeAgo(dateStr: string) {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+    if (diffInSeconds < 60) return 'Vừa xong'
+    const diffInMinutes = Math.floor(diffInSeconds / 60)
+    if (diffInMinutes < 60) return `${diffInMinutes} phút trước`
+    const diffInHours = Math.floor(diffInMinutes / 60)
+    if (diffInHours < 24) return `${diffInHours} giờ trước`
+    const diffInDays = Math.floor(diffInHours / 24)
+    return `${diffInDays} ngày trước`
+  }
 
 
   return (
@@ -173,32 +225,24 @@ export default async function AdminDashboard() {
         <div className="col-span-3 rounded-2xl bg-white shadow-sm border border-slate-100 overflow-hidden p-6">
           <h3 className="font-bold text-slate-800 text-lg mb-6">Hoạt động gần đây</h3>
           <div className="space-y-6">
-            <div className="flex gap-4">
-              <div className="h-8 w-8 rounded-full bg-blue-50 shrink-0 flex items-center justify-center border border-blue-100">
-                <span className="text-blue-600 text-xs font-bold">JD</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-800">John Doe đã đặt lịch hẹn mới</p>
-                <p className="text-xs text-slate-500 mt-1">2 phút trước</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="h-8 w-8 rounded-full bg-emerald-50 shrink-0 flex items-center justify-center border border-emerald-100">
-                <span className="text-emerald-600 text-xs font-bold">$</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-800">Thanh toán 500,000đ được ghi nhận</p>
-                <p className="text-xs text-slate-500 mt-1">15 phút trước</p>
-              </div>
-            </div>
-            <div className="flex gap-4 opacity-50">
-              <div className="h-8 w-8 rounded-full bg-slate-100 shrink-0 flex items-center justify-center border border-slate-200">
-                <span className="text-slate-500 text-xs font-bold">...</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-800">Đang tải thêm hoạt động...</p>
-              </div>
-            </div>
+            {activities.length > 0 ? (
+              activities.map((activity) => (
+                <div key={`${activity.type}-${activity.id}`} className="flex gap-4">
+                  <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center border ${activity.type === 'booking'
+                    ? 'bg-blue-50 border-blue-100 text-blue-600'
+                    : 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                    }`}>
+                    <span className="text-xs font-bold">{activity.initials}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{activity.title}</p>
+                    <p className="text-xs text-slate-500 mt-1">{timeAgo(activity.time)}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-slate-500 italic">Chưa có hoạt động nào gần đây.</p>
+            )}
           </div>
         </div>
       </div>

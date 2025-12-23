@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState } from 'react'
@@ -52,32 +53,32 @@ export function ExamForm({ bookingId }: { bookingId: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-sm border">
       <div>
-        <label className="block text-sm font-medium text-gray-700">Chẩn đoán bệnh <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-medium text-slate-700">Chẩn đoán bệnh <span className="text-red-500">*</span></label>
         <textarea
           name="diagnosis"
           required
           rows={3}
-          className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          className="mt-1 block w-full rounded-md border border-slate-300 bg-white p-3 text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none sm:text-sm transition-all"
           placeholder="Nhập kết quả chẩn đoán..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Đơn thuốc / Chỉ định</label>
+        <label className="block text-sm font-medium text-slate-700">Đơn thuốc / Chỉ định</label>
         <textarea
           name="prescription"
           rows={4}
-          className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          className="mt-1 block w-full rounded-md border border-slate-300 bg-white p-3 text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none sm:text-sm transition-all"
           placeholder="Tên thuốc, liều lượng..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Ghi chú của bác sĩ (cho lần sau)</label>
+        <label className="block text-sm font-medium text-slate-700">Ghi chú của bác sĩ (cho lần sau)</label>
         <textarea
           name="doctor_notes"
           rows={2}
-          className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          className="mt-1 block w-full rounded-md border border-slate-300 bg-white p-3 text-slate-900 placeholder:text-slate-500 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none sm:text-sm transition-all"
           placeholder="Lưu ý tái khám..."
         />
       </div>

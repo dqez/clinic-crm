@@ -159,8 +159,8 @@ export function LoginForm() {
               <div className="rounded-xl bg-red-50 border border-red-200 p-4 flex items-start gap-3 animate-shake">
                 <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-red-800">Đăng nhập thất bại</p>
-                  <p className="text-sm text-red-600 mt-1">{error}</p>
+                  <p className="text-sm font-medium text-red-800">Tài khoản hoặc mật khẩu không chính xác</p>
+                  {/* <p className="text-sm text-red-600 mt-1">{error}</p> */}
                 </div>
               </div>
             )}

@@ -49,16 +49,16 @@ export default async function ExamPage({ params }: { params: { id: string } }) {
         <h1 className="text-3xl font-bold text-gray-900">Phiếu khám bệnh</h1>
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="text-gray-500">Bệnh nhân:</span>
-            <span className="ml-2 font-medium">{booking.patient_name}</span>
+            <span className="text-slate-500">Bệnh nhân:</span>
+            <span className="ml-2 text-slate-900 font-medium">{booking.patient_name}</span>
           </div>
           <div>
-            <span className="text-gray-500">Dịch vụ:</span>
-            <span className="ml-2 font-medium">{booking.services?.name}</span>
+            <span className="text-slate-500">Dịch vụ:</span>
+            <span className="ml-2 text-slate-900 font-medium">{booking.services?.name}</span>
           </div>
           <div>
-            <span className="text-gray-500">Triệu chứng ban đầu:</span>
-            <span className="ml-2 italic">{booking.symptoms}</span>
+            <span className="text-slate-500">Triệu chứng ban đầu:</span>
+            <span className="ml-2 text-slate-900 italic">{booking.symptoms}</span>
           </div>
         </div>
       </div>
