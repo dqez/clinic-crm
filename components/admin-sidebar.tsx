@@ -15,7 +15,12 @@ const navigation = [
   { name: 'Tài chính', href: '/admin/finance', icon: DollarSign },
 ]
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  className?: string
+  onLinkClick?: () => void
+}
+
+export function AdminSidebar({ className, onLinkClick }: AdminSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [userEmail, setUserEmail] = useState<string>('')
@@ -60,7 +65,7 @@ export function AdminSidebar() {
   }
 
   return (
-    <div className="flex h-full w-64 flex-col bg-white border-r border-slate-200 shadow-sm">
+    <div className={cn("flex h-full w-64 flex-col bg-white border-r border-slate-200 shadow-sm", className)}>
       <div className="flex h-16 items-center justify-center border-b border-slate-100 px-6">
         <h1 className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Clinic Admin</h1>
       </div>
@@ -71,6 +76,7 @@ export function AdminSidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onLinkClick}
               className={cn(
                 'group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
                 isActive

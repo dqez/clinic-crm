@@ -40,44 +40,46 @@ export default async function PatientsPage({ searchParams }: { searchParams: { q
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Họ tên</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">SĐT</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Email</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Lượt khám</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Ngày tạo</th>
-              <th className="relative px-6 py-4"><span className="sr-only">Xem</span></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200 bg-white">
-            {patients?.map((patient: any) => (
-              <tr key={patient.id} className="hover:bg-slate-50 transition-colors">
-                <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-900">
-                  <Link href={`/admin/patients/${patient.id}`} className="hover:text-blue-600 transition-colors">
-                    {patient.name}
-                  </Link>
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-slate-600">{patient.phone}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-slate-600">{patient.email}</td>
-                <td className="whitespace-nowrap px-6 py-4 text-slate-600">
-                  <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                    {patient.bookings?.[0]?.count || 0}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-slate-600">
-                  {new Date(patient.created_at).toLocaleDateString('vi-VN')}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                  <Link href={`/admin/patients/${patient.id}`} className="text-indigo-600 hover:text-indigo-900 font-semibold">
-                    Chi tiết
-                  </Link>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Họ tên</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">SĐT</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Email</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Lượt khám</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Ngày tạo</th>
+                <th className="relative px-6 py-4"><span className="sr-only">Xem</span></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-200 bg-white">
+              {patients?.map((patient: any) => (
+                <tr key={patient.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-900">
+                    <Link href={`/admin/patients/${patient.id}`} className="hover:text-blue-600 transition-colors">
+                      {patient.name}
+                    </Link>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-slate-600">{patient.phone}</td>
+                  <td className="whitespace-nowrap px-6 py-4 text-slate-600">{patient.email}</td>
+                  <td className="whitespace-nowrap px-6 py-4 text-slate-600">
+                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                      {patient.bookings?.[0]?.count || 0}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-slate-600">
+                    {new Date(patient.created_at).toLocaleDateString('vi-VN')}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                    <Link href={`/admin/patients/${patient.id}`} className="text-indigo-600 hover:text-indigo-900 font-semibold">
+                      Chi tiết
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         {patients?.length === 0 && (
           <div className="p-12 text-center text-slate-500">
             <p className="text-lg font-medium text-slate-900">Không tìm thấy bệnh nhân nào</p>
