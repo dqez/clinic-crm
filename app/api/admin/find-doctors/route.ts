@@ -4,11 +4,23 @@ import { NextResponse } from 'next/server'
 import { formatInTimeZone } from 'date-fns-tz'
 import { addMinutes } from 'date-fns'
 
+// Helper: Chuyển đổi giờ (HH:mm hoặc HH:mm:ss) thành số phút để so sánh an toàn
+function timeToMinutes(timeStr: string | null | undefined): number {
+  if (!timeStr) return -1;
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return (hours || 0) * 60 + (minutes || 0);
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient()
 
   // 1. Parse Input
   const { service_id, booking_time } = await request.json()
+
+  // LOGGING: Check input gốc từ client
+  console.log('--- FIND DOCTORS REQUEST ---');
+  console.log('Input booking_time:', booking_time);
+  console.log('Input service_id:', service_id);
 
   if (!service_id || !booking_time) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -20,9 +32,13 @@ export async function POST(request: Request) {
   // Tạo date object từ input
   const reqDate = new Date(booking_time);
 
-  // Format ngày và giờ theo múi giờ VN (luôn nhất quán trên mọi môi trường)
+  // Format ngày và giờ theo múi giờ VN
   const localDateStr = formatInTimeZone(reqDate, TIME_ZONE, 'yyyy-MM-dd'); // YYYY-MM-DD
   const localTimeStr = formatInTimeZone(reqDate, TIME_ZONE, 'HH:mm:ss'); // HH:mm:ss
+
+  // LOGGING: Check thời gian đã quy đổi
+  console.log('Converted Date (VN):', localDateStr);
+  console.log('Converted Time (VN):', localTimeStr);
 
   try {
     // 2. Get Service Info (Duration)
@@ -36,18 +52,24 @@ export async function POST(request: Request) {
 
     const duration = serviceData?.duration_minutes || 30
 
-    // Tính thời gian kết thúc của slot khách ĐANG MUỐN đặt sử dụng date-fns
+    // Tính thời gian kết thúc của slot khách ĐANG MUỐN đặt
     const reqEndTime = addMinutes(reqDate, duration);
     const reqEndTimeStr = formatInTimeZone(reqEndTime, TIME_ZONE, 'HH:mm:ss');
+
+    console.log('Request Duration:', duration);
+    console.log('Request EndTime (VN):', reqEndTimeStr);
+
+    // Chuẩn bị số phút để so sánh (Logic quan trọng)
+    const reqStartMinutes = timeToMinutes(localTimeStr);
+    const reqEndMinutes = timeToMinutes(reqEndTimeStr);
 
     // 3. Parallel Fetching
     const [
       { data: doctorsData, error: doctorsError },
       { data: dailySchedules, error: scheduleError },
-      // FIX: Query booking không chỉ theo giờ mà query HẾT booking trong ngày đó để check overlap
       { data: existingBookings, error: bookingError }
     ] = await Promise.all([
-      // Query A: Doctors (giữ nguyên)
+      // Query A: Doctors
       supabase
         .from('doctors')
         .select(`
@@ -57,15 +79,14 @@ export async function POST(request: Request) {
         `)
         .eq('doctor_services.service_id', service_id),
 
-      // Query B: Schedules (giữ nguyên)
+      // Query B: Schedules
       supabase
         .from('doctor_schedules')
         .select('*')
         .eq('date', localDateStr)
         .eq('is_available', true),
 
-      // Query C: FIX - Lấy tất cả booking "active" trong ngày hôm đó
-      // Cần join bảng services để lấy duration của các booking cũ -> tính ra thời gian kết thúc
+      // Query C: Bookings active trong ngày
       supabase
         .from('bookings')
         .select(`
@@ -73,8 +94,6 @@ export async function POST(request: Request) {
           booking_time, 
           service:services(duration_minutes) 
         `)
-        // Cần filter booking trong khoảng ngày đó (Start Day <= booking <= End Day)
-        // FIX: Sử dụng .lte() thay vì .lt() để bao gồm cả bookings vào cuối ngày
         .gte('booking_time', `${localDateStr}T00:00:00`)
         .lte('booking_time', `${localDateStr}T23:59:59`)
         .neq('status', 'cancelled')
@@ -85,20 +104,22 @@ export async function POST(request: Request) {
     if (scheduleError) throw scheduleError
     if (bookingError) throw bookingError
 
+    // LOGGING: Số lượng items tìm thấy
+    console.log(`Found: ${doctorsData?.length || 0} doctors, ${dailySchedules?.length || 0} schedules, ${existingBookings?.length || 0} bookings`);
+
     if (!doctorsData || doctorsData.length === 0) {
       return NextResponse.json({ data: [] })
     }
 
-    // --- XỬ LÝ LOGIC CHECK BẬN (COLLISION DETECTION) ---
+    // --- XỬ LÝ CHECK BẬN ---
     const busyDoctorIds = new Set<string>();
 
-    // Request Interval: [reqStart, reqEnd]
     const reqStart = reqDate.getTime();
     const reqEnd = reqEndTime.getTime();
 
     if (existingBookings) {
       for (const booking of existingBookings) {
-        if (!booking.service) continue; // Skip nếu dữ liệu lỗi
+        if (!booking.service) continue;
 
         const bookStart = new Date(booking.booking_time).getTime();
         const bookDuration = (booking.service as { duration_minutes: number }).duration_minutes || 30;
@@ -122,13 +143,21 @@ export async function POST(request: Request) {
       if (busyDoctorIds.has(doc.id)) return false;
 
       // 4.3 Check có thuộc ca trực (Shift) không
-      // Logic: Shift Start <= Request Start AND Shift End >= Request End
-      // Tức là thời gian khách đặt phải NẰM TRỌN trong ca làm việc
-      const validSchedule = dailySchedules?.find(s =>
-        s.doctor_id === doc.id &&
-        s.start_time <= localTimeStr &&
-        s.end_time >= reqEndTimeStr // So sánh giờ kết thúc của slot với giờ kết thúc ca
-      )
+      // FIX: So sánh bằng số phút thay vì chuỗi để tránh lỗi "09:00" vs "09:00:00"
+      const validSchedule = dailySchedules?.find(s => {
+        if (s.doctor_id !== doc.id) return false;
+
+        const shiftStartMinutes = timeToMinutes(s.start_time);
+        const shiftEndMinutes = timeToMinutes(s.end_time);
+
+        // Logic: Shift Start <= Request Start AND Shift End >= Request End
+        const isWithinShift = (shiftStartMinutes <= reqStartMinutes) && (shiftEndMinutes >= reqEndMinutes);
+
+        // Debug log nếu cần thiết (optional)
+        // if (doc.id === 'some-id') console.log('Check Shift:', { shiftStartMinutes, shiftEndMinutes, reqStartMinutes, reqEndMinutes, isWithinShift })
+
+        return isWithinShift;
+      });
 
       return !!validSchedule
     }).map(doc => ({
@@ -137,6 +166,8 @@ export async function POST(request: Request) {
       specialty: doc.specialty,
       degree: doc.degree
     }))
+
+    console.log('Available Result:', availableDoctors.length);
 
     return NextResponse.json({ data: availableDoctors })
 
