@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { formatInTimeZone } from 'date-fns-tz'
+import { formatInTimeZone, fromZonedTime } from 'date-fns-tz'
 import { addMinutes } from 'date-fns'
 
 // Helper: Chuyển đổi giờ (HH:mm hoặc HH:mm:ss) thành số phút để so sánh an toàn
@@ -29,8 +29,10 @@ export async function POST(request: Request) {
   // --- FIX TIMEZONE với date-fns-tz ---
   const TIME_ZONE = 'Asia/Ho_Chi_Minh';
 
-  // Tạo date object từ input
-  const reqDate = new Date(booking_time);
+  // FIX CRITICAL: Parse input string dưới dạng giờ VN
+  // Vercel (UTC) hiểu lầm "14:30" là UTC -> convert ra VN thành "21:30"
+  // Dùng fromZonedTime để khẳng định "14:30" này LÀ giờ VN.
+  const reqDate = fromZonedTime(booking_time, TIME_ZONE);
 
   // Format ngày và giờ theo múi giờ VN
   const localDateStr = formatInTimeZone(reqDate, TIME_ZONE, 'yyyy-MM-dd'); // YYYY-MM-DD
