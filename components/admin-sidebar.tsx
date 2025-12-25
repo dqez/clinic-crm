@@ -69,32 +69,34 @@ export function AdminSidebar({ className, onLinkClick }: AdminSidebarProps) {
       <div className="flex h-16 items-center justify-center border-b border-slate-100 px-6">
         <h1 className="text-xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Clinic Admin</h1>
       </div>
-      <nav className="flex-1 space-y-1 px-4 py-6">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              onClick={onLinkClick}
-              className={cn(
-                'group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                isActive
-                  ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-100'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              )}
-            >
-              <item.icon
+      <nav className="flex-1 px-4 py-6" data-tour="sidebar">
+        <div className="space-y-1">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={onLinkClick}
                 className={cn(
-                  'mr-3 h-5 w-5 shrink-0 transition-colors',
-                  isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'
+                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-slate-700 hover:bg-slate-50 hover:text-slate-900",
                 )}
-                aria-hidden="true"
-              />
-              {item.name}
-            </Link>
-          )
-        })}
+              >
+                <item.icon
+                  className={cn(
+                    "h-5 w-5 shrink-0 transition-colors",
+                    isActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600",
+                  )}
+                  aria-hidden="true"
+                />
+                {item.name}
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
       {/* User Profile & Sign Out Section */}

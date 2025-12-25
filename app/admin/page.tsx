@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { RevenueChart } from '@/components/revenue-chart'
+import { PendingActions } from '@/components/pending-actions'
+import { QuickActionsBar } from '@/components/quick-actions-bar'
+import { OnboardingChecklist } from '@/components/onboarding-checklist'
 import { DollarSign, Users, Calendar, Activity } from 'lucide-react'
 
 export default async function AdminDashboard() {
@@ -19,7 +22,9 @@ export default async function AdminDashboard() {
     { count: patientCount },
     { data: recentPayments },
     { data: latestBookings },
-    { data: latestPayments }
+    { data: latestPayments },
+    { count: pendingBookingsCount },
+    { count: pendingPaymentsCount }
   ] = await Promise.all([
     // A. Revenue Today
     supabase
@@ -60,7 +65,19 @@ export default async function AdminDashboard() {
       .select('id, amount, created_at')
       .eq('status', 'paid')
       .order('created_at', { ascending: false })
-      .limit(5)
+      .limit(5),
+
+    // G. Pending Bookings Count
+    supabase
+      .from('bookings')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending'),
+
+    // H. Pending Payments Count
+    supabase
+      .from('payments')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending')
   ])
 
   const totalRevenueToday = paymentsToday?.reduce((sum, p) => sum + p.amount, 0) || 0
@@ -128,13 +145,29 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Pending Actions - Hero Section */}
+      <div data-tour="pending-actions">
+        <PendingActions
+          pendingBookings={pendingBookingsCount || 0}
+          pendingPayments={pendingPaymentsCount || 0}
+        />
+      </div>
+
+      {/* Quick Actions Bar */}
+      <div data-tour="quick-actions">
+        <QuickActionsBar />
+      </div>
+
+      {/* Onboarding Checklist */}
+      <OnboardingChecklist />
+
       <div>
         <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Tổng quan Phòng khám</h1>
         <p className="text-slate-500 mt-2">Chào mừng trở lại! Đây là tình hình hoạt động hôm nay.</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4" data-tour="stats">
         <div className="group rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>

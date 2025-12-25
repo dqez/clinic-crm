@@ -1,4 +1,6 @@
 import { AdminShell } from '@/components/admin-shell'
+import { ToastContainer } from '@/components/toast'
+import { InteractiveTour } from '@/components/interactive-tour'
 
 export default function AdminLayout({
   children,
@@ -8,6 +10,8 @@ export default function AdminLayout({
   return (
     <AdminShell>
       {children}
+      <ToastContainer />
+      <InteractiveTour />
     </AdminShell>
   )
 }

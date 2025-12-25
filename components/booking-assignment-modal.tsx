@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { toast } from '@/components/toast'
 
 interface Doctor {
   id: string
@@ -43,7 +44,8 @@ export function BookingAssignmentModal({ booking, isOpen, onClose }: BookingAssi
           setDoctors(json.data)
         }
       } catch (err) {
-        console.error(err)
+        console.error('Error fetching doctors:', err)
+        toast('Không thể tải danh sách bác sĩ', 'error')
       } finally {
         setLoading(false)
       }
@@ -72,11 +74,20 @@ export function BookingAssignmentModal({ booking, isOpen, onClose }: BookingAssi
 
       if (error) throw error
 
-      alert('Đã phân công bác sĩ thành công!')
+      // Success!
+      toast('Đã phân công bác sĩ thành công!', 'success')
       onClose()
-      router.refresh() // Refresh server components
+
+      // Auto-refresh to show updated data
+      setTimeout(() => {
+        router.refresh()
+      }, 300) // Small delay for smooth UX
+
     } catch (err: any) {
-      alert('Lỗi: ' + err.message)
+      // Error handling with specific messages
+      const errorMessage = err.message || 'Có lỗi xảy ra khi phân công bác sĩ'
+      toast(errorMessage, 'error')
+      console.error('Assignment error:', err)
     } finally {
       setAssigning(false)
     }
