@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { formatInTimeZone } from 'date-fns-tz'
+import { addMinutes } from 'date-fns'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -12,14 +14,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  // --- FIX TIMEZONE ---
-  // Tạo date object chuẩn
+  // --- FIX TIMEZONE với date-fns-tz ---
+  const TIME_ZONE = 'Asia/Ho_Chi_Minh';
+
+  // Tạo date object từ input
   const reqDate = new Date(booking_time);
 
-  // Lấy ngày/giờ theo múi giờ VN để query DB chính xác
-  const timeZone = 'Asia/Ho_Chi_Minh';
-  const localDateStr = reqDate.toLocaleDateString('sv-SE', { timeZone }); // YYYY-MM-DD
-  const localTimeStr = reqDate.toLocaleTimeString('en-GB', { timeZone, hour12: false }); // HH:mm:ss (en-GB luôn trả về 24h format chuẩn có padding 0)
+  // Format ngày và giờ theo múi giờ VN (luôn nhất quán trên mọi môi trường)
+  const localDateStr = formatInTimeZone(reqDate, TIME_ZONE, 'yyyy-MM-dd'); // YYYY-MM-DD
+  const localTimeStr = formatInTimeZone(reqDate, TIME_ZONE, 'HH:mm:ss'); // HH:mm:ss
 
   try {
     // 2. Get Service Info (Duration)
@@ -33,10 +36,9 @@ export async function POST(request: Request) {
 
     const duration = serviceData?.duration_minutes || 30
 
-    // Tính thời gian kết thúc của slot khách ĐANG MUỐN đặt
-    // Lưu ý: Tính toán cộng trừ date nên dùng timestamp gốc (UTC) để tránh sai lệch
-    const reqEndTime = new Date(reqDate.getTime() + duration * 60000);
-    const reqEndTimeStr = reqEndTime.toLocaleTimeString('en-GB', { timeZone, hour12: false });
+    // Tính thời gian kết thúc của slot khách ĐANG MUỐN đặt sử dụng date-fns
+    const reqEndTime = addMinutes(reqDate, duration);
+    const reqEndTimeStr = formatInTimeZone(reqEndTime, TIME_ZONE, 'HH:mm:ss');
 
     // 3. Parallel Fetching
     const [
