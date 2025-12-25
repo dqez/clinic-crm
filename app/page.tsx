@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Calendar, Users, Activity } from "lucide-react";
+import { ArrowRight, Calendar, Users, Activity, LayoutDashboard, Stethoscope, BarChart } from "lucide-react";
 
 export default function Home() {
   return (
@@ -63,6 +63,68 @@ export default function Home() {
               >
                 Tìm hiểu thêm
               </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Workflow Section */}
+        <section className="bg-zinc-50 py-24 sm:py-32">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
+                Quy trình làm việc tối ưu
+              </h2>
+              <p className="mt-4 text-lg leading-8 text-zinc-600">
+                Được thiết kế để đơn giản hóa mọi thao tác quản lý phòng khám của bạn, từ tiếp nhận đến báo cáo.
+              </p>
+            </div>
+
+            <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+              <div className="grid grid-cols-1 gap-y-12 lg:grid-cols-4 lg:gap-x-8">
+                {/* Step 1 */}
+                <div className="relative flex flex-col items-center text-center">
+                  <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-zinc-900/10">
+                    <LayoutDashboard className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold leading-8 text-zinc-900">1. Tổng quan & Hành động</h3>
+                  <p className="mt-2 text-base leading-7 text-zinc-600">
+                    Bắt đầu ngày mới với các tác vụ ưu tiên được tự động đề xuất ngay trên Dashboard.
+                  </p>
+                </div>
+
+                {/* Step 2 */}
+                <div className="relative flex flex-col items-center text-center">
+                  <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-zinc-900/10">
+                    <Calendar className="h-8 w-8 text-indigo-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold leading-8 text-zinc-900">2. Tiếp nhận & Xếp lịch</h3>
+                  <p className="mt-2 text-base leading-7 text-zinc-600">
+                    Hệ thống tự động sắp xếp và phân loại đặt hẹn thông minh, tránh trùng lặp.
+                  </p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="relative flex flex-col items-center text-center">
+                  <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-zinc-900/10">
+                    <Stethoscope className="h-8 w-8 text-purple-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold leading-8 text-zinc-900">3. Chăm sóc & Điều trị</h3>
+                  <p className="mt-2 text-base leading-7 text-zinc-600">
+                    Bác sĩ tiếp nhận hồ sơ và lịch sử khám của bệnh nhân chỉ với một cú nhấp chuột.
+                  </p>
+                </div>
+
+                {/* Step 4 */}
+                <div className="relative flex flex-col items-center text-center">
+                  <div className="relative z-10 mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-zinc-900/10">
+                    <BarChart className="h-8 w-8 text-emerald-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold leading-8 text-zinc-900">4. Hoàn tất & Báo cáo</h3>
+                  <p className="mt-2 text-base leading-7 text-zinc-600">
+                    Tự động tổng hợp doanh thu và báo cáo hiệu quả hoạt động ngay lập tức.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
