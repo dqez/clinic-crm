@@ -71,11 +71,10 @@ export async function POST(request: Request) {
           booking_time, 
           service:services(duration_minutes) 
         `)
-        // Cần filter booking trong khoảng ngày đó (Start Day <= booking < Next Day)
-        // Cách đơn giản nhất: check booking_time dạng text like 'YYYY-MM-DD%' nếu format trong DB cho phép
-        // Hoặc filter range timestamp (an toàn nhất)
+        // Cần filter booking trong khoảng ngày đó (Start Day <= booking <= End Day)
+        // FIX: Sử dụng .lte() thay vì .lt() để bao gồm cả bookings vào cuối ngày
         .gte('booking_time', `${localDateStr}T00:00:00`)
-        .lt('booking_time', `${localDateStr}T23:59:59`)
+        .lte('booking_time', `${localDateStr}T23:59:59`)
         .neq('status', 'cancelled')
         .not('doctor_id', 'is', null)
     ])
