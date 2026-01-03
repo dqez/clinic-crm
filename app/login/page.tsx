@@ -1,8 +1,42 @@
 import { LoginForm } from "@/components/login-form"
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+
+  // Nếu đã đăng nhập, chuyển hướng dựa trên role
+  if (session) {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+
+    const role = userData?.role;
+
+    if (role === 'admin') {
+      redirect('/admin');
+    } else if (role === 'doctor') {
+      redirect('/doctor/schedule');
+    } else {
+      redirect('/'); // Patient quay về trang chủ
+    }
+  }
+
   return (
-    <div className="flex min-h-screen bg-linear-to-br from-blue-50 via-white to-cyan-50">
+    <div className="flex min-h-screen bg-linear-to-br from-blue-50 via-white to-cyan-50 relative">
+      {/* Back Button */}
+      <Link
+        href="/"
+        className="absolute top-6 left-6 z-20 inline-flex items-center text-sm font-medium text-white hover:text-slate-900 transition-colors group"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
+        Quay lại trang chủ
+      </Link>
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-linear-to-br from-blue-600 via-cyan-600 to-teal-500">
         {/* Animated background pattern */}
