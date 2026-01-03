@@ -90,7 +90,9 @@ export function PatientTabs({ patient, history }: { patient: any, history: any[]
                         booking.status === 'confirmed' ? "bg-blue-100 text-blue-800" :
                           "bg-yellow-100 text-yellow-800"
                     )}>
-                      {booking.status}
+                      {booking.status === 'completed' ? 'Hoàn thành' :
+                        booking.status === 'confirmed' ? 'Đã xác nhận' :
+                          'Chờ xác nhận'}
                     </span>
                   </div>
                 </div>

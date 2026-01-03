@@ -7,10 +7,10 @@ export default async function PatientsPage({ searchParams }: { searchParams: { q
   const supabase = await createClient()
   const query = (await searchParams)?.q || ''
 
-  // Build Query
+  // Build Query for users
   let dbQuery = supabase
     .from('users')
-    .select('*, bookings:bookings!bookings_user_id_fkey(count)')
+    .select('*')
     .eq('role', 'patient')
 
   if (query) {
@@ -22,6 +22,22 @@ export default async function PatientsPage({ searchParams }: { searchParams: { q
   if (error) {
     return <div>Lỗi khi tải danh sách bệnh nhân: {error.message}</div>
   }
+
+  // Fetch completed bookings count for each patient
+  const patientsWithCount = await Promise.all(
+    (patients || []).map(async (patient) => {
+      const { count } = await supabase
+        .from('bookings')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', patient.id)
+        .eq('status', 'completed')
+
+      return {
+        ...patient,
+        completed_bookings_count: count || 0
+      }
+    })
+  )
 
   return (
     <div>
@@ -53,7 +69,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: { q
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 bg-white">
-              {patients?.map((patient: any) => (
+              {patientsWithCount?.map((patient: any) => (
                 <tr key={patient.id} className="hover:bg-slate-50 transition-colors">
                   <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-900">
                     <Link href={`/admin/patients/${patient.id}`} className="hover:text-blue-600 transition-colors">
@@ -64,7 +80,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: { q
                   <td className="whitespace-nowrap px-6 py-4 text-slate-600">{patient.email}</td>
                   <td className="whitespace-nowrap px-6 py-4 text-slate-600">
                     <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                      {patient.bookings?.[0]?.count || 0}
+                      {patient.completed_bookings_count}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-slate-600">
@@ -80,7 +96,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: { q
             </tbody>
           </table>
         </div>
-        {patients?.length === 0 && (
+        {patientsWithCount?.length === 0 && (
           <div className="p-12 text-center text-slate-500">
             <p className="text-lg font-medium text-slate-900">Không tìm thấy bệnh nhân nào</p>
             <p className="text-sm mt-1">Thử thay đổi từ khóa tìm kiếm.</p>
