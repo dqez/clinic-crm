@@ -10,9 +10,9 @@ import { createClient } from '@/lib/supabase/client'
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Quản lý Lịch hẹn', href: '/admin/bookings', icon: Calendar },
-  { name: 'Bệnh nhân', href: '/admin/patients', icon: Users },
   { name: 'Bác sĩ & Lịch', href: '/admin/doctors', icon: Stethoscope },
-  { name: 'Tài chính', href: '/admin/finance', icon: DollarSign },
+  { name: 'Bệnh nhân', href: '/admin/patients', icon: Users },
+  // { name: 'Tài chính', href: '/admin/finance', icon: DollarSign },
 ]
 
 interface AdminSidebarProps {

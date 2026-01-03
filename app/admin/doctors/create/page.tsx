@@ -400,9 +400,9 @@ export default function CreateDoctorPage() {
                       />
                       <div className="flex-1">
                         <span className="text-sm font-medium text-slate-900">{service.name}</span>
-                        <span className="text-xs text-slate-500 ml-2">
+                        {/* <span className="text-xs text-slate-500 ml-2">
                           ({new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(service.price)})
-                        </span>
+                        </span> */}
                       </div>
                     </label>
                   ))

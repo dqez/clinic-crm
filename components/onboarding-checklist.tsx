@@ -16,7 +16,6 @@ const defaultChecklist: ChecklistItem[] = [
   { id: 'login', label: 'Đăng nhập thành công', completed: true }, // Auto-completed
   { id: 'add-doctor', label: 'Thêm bác sĩ đầu tiên', completed: false },
   { id: 'process-booking', label: 'Xử lý đơn đặt lịch đầu tiên', completed: false },
-  { id: 'confirm-payment', label: 'Xác nhận thanh toán', completed: false }
 ]
 
 export function OnboardingChecklist() {

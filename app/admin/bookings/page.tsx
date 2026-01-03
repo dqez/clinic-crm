@@ -5,7 +5,7 @@ import { BookingClient } from './client-page' // We'll move the client logic her
 export default async function BookingsPage() {
   const supabase = await createClient()
 
-  // Fetch Pending Bookings
+  // Fetch Paid Bookings (chỉ lấy những booking đã thanh toán từ web con)
   const { data: bookings, error } = await supabase
     .from('bookings')
     .select(`
@@ -15,13 +15,19 @@ export default async function BookingsPage() {
         patient_phone,
         status,
         service_id,
-        services ( name )
+        services ( name ),
+        payments!inner (
+          status,
+          amount,
+          payment_date
+        )
     `)
-    .eq('status', 'pending')
+    .in('status', ['paid', 'pending'])
+    .eq('payments.status', 'paid')
     .order('booking_time', { ascending: true })
 
   if (error) {
-    return <div>Error loading bookings</div>
+    return <div>Lỗi khi tải danh sách đặt lịch</div>
   }
 
   return (

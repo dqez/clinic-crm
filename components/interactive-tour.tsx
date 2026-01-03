@@ -35,7 +35,7 @@ const tourSteps: TourStep[] = [
   {
     target: '[data-tour="sidebar"]',
     title: 'Menu điều hướng',
-    content: 'Sử dụng menu bên trái để truy cập các phần khác nhau: Lịch hẹn, Bệnh nhân, Bác sĩ, và Tài chính.',
+    content: 'Sử dụng menu bên trái để truy cập các phần khác nhau: Lịch hẹn, Bác sĩ và Bệnh nhân',
     placement: 'right'
   }
 ]

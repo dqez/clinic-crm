@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { RevenueChart } from '@/components/revenue-chart'
+import { RevenueChartSection } from '@/components/revenue-chart-section'
 import { PendingActions } from '@/components/pending-actions'
 import { QuickActionsBar } from '@/components/quick-actions-bar'
 import { OnboardingChecklist } from '@/components/onboarding-checklist'
@@ -23,8 +23,7 @@ export default async function AdminDashboard() {
     { data: recentPayments },
     { data: latestBookings },
     { data: latestPayments },
-    { count: pendingBookingsCount },
-    { count: pendingPaymentsCount }
+    { count: pendingBookingsCount }
   ] = await Promise.all([
     // A. Revenue Today
     supabase
@@ -67,17 +66,12 @@ export default async function AdminDashboard() {
       .order('created_at', { ascending: false })
       .limit(5),
 
-    // G. Pending Bookings Count
+    // G. Pending Bookings Count (đã thanh toán, chưa xếp lịch)
     supabase
       .from('bookings')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending'),
-
-    // H. Pending Payments Count
-    supabase
-      .from('payments')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending')
+      .select('payments!inner(status)', { count: 'exact', head: true })
+      .in('status', ['paid', 'pending'])
+      .eq('payments.status', 'paid')
   ])
 
   const totalRevenueToday = paymentsToday?.reduce((sum, p) => sum + p.amount, 0) || 0
@@ -149,7 +143,6 @@ export default async function AdminDashboard() {
       <div data-tour="pending-actions">
         <PendingActions
           pendingBookings={pendingBookingsCount || 0}
-          pendingPayments={pendingPaymentsCount || 0}
         />
       </div>
 
@@ -171,7 +164,7 @@ export default async function AdminDashboard() {
         <div className="group rounded-2xl bg-white p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Doanh thu hôm nay</p>
+              <p className="text-sm font-medium text-slate-500">Thanh toán đặt lịch khám</p>
               <p className="text-3xl font-bold text-slate-900 mt-2">
                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalRevenueToday)}
               </p>
@@ -181,11 +174,7 @@ export default async function AdminDashboard() {
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
-            <span className="text-emerald-600 font-medium flex items-center">
-              +12%
-              <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-            </span>
-            <span className="text-slate-400 ml-2">so với hôm qua</span>
+            <span className="text-slate-500">Từ HealthBooking hôm nay</span>
           </div>
         </div>
 
@@ -245,15 +234,7 @@ export default async function AdminDashboard() {
 
       {/* Charts Area */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <div className="col-span-4 rounded-2xl bg-white shadow-sm border border-slate-100 overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-bold text-slate-800 text-lg">Doanh thu 7 ngày qua</h3>
-            <button className="text-sm text-blue-600 font-medium hover:text-blue-700">Xem chi tiết</button>
-          </div>
-          <div className="p-6">
-            <RevenueChart data={chartData} />
-          </div>
-        </div>
+        <RevenueChartSection initialData={chartData} />
 
         <div className="col-span-3 rounded-2xl bg-white shadow-sm border border-slate-100 overflow-hidden p-6">
           <h3 className="font-bold text-slate-800 text-lg mb-6">Hoạt động gần đây</h3>

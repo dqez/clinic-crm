@@ -10,7 +10,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: { q
   // Build Query
   let dbQuery = supabase
     .from('users')
-    .select('*, bookings:bookings!fk_bookings_user_id_users_id(count)')
+    .select('*, bookings:bookings!bookings_user_id_fkey(count)')
     .eq('role', 'patient')
 
   if (query) {
@@ -20,7 +20,7 @@ export default async function PatientsPage({ searchParams }: { searchParams: { q
   const { data: patients, error } = await dbQuery
 
   if (error) {
-    return <div>Error loading patients: {error.message}</div>
+    return <div>Lỗi khi tải danh sách bệnh nhân: {error.message}</div>
   }
 
   return (
