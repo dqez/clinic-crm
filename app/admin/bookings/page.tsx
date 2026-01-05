@@ -24,7 +24,8 @@ export default async function BookingsPage() {
     `)
     .in('status', ['paid', 'pending'])
     .eq('payments.status', 'paid')
-    .order('booking_time', { ascending: true })
+    .order('booking_time', { ascending: false })
+    .order('created_at', { ascending: false })
 
   if (error) {
     return <div>Lỗi khi tải danh sách đặt lịch</div>
