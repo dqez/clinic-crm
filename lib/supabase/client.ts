@@ -14,7 +14,7 @@ export const createClient = () => {
       );
     }
     
-  createBrowserClient<Database>(
+  return createBrowserClient<Database>(
     supabaseUrl, supabaseAnonKey
   )
 }
